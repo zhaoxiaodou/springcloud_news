@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:shiro="http://www.pollix.at/thymeleaf/shiro"
+        xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3"
+>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<script type="text/javascript" src="/javascript/jsFiles.js"></script>
+<script>
+    var newsType = "all";
+    $(function () {
+        intiTree();
+        initTable();
+    })
+    function intiTree() {
+        $.ajax({
+            url:'/news/queryCategory',
+            success:function(result){
+                $('#tree').treeview({
+                    data: result,
+                    onNodeSelected: function(event, data) {
+                        shopType = data.cateId;
+                        searchNews();
+                    }
+                });
+            },
+            error:function(){
+
+            }
+        })
+    }
+    function searchNews() {
+        $('#table').bootstrapTable('refresh')
+    }
+
+    function initTable() {
+        $('#table').bootstrapTable({
+            url: '/news/queryNews',         //请求后台的URL（*）
+            striped: true,                      //是否显示行间隔色
+            cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+            pagination: true,                   //是否显示分页（*）
+            sortable: false,                     //是否启用排序
+            sortOrder: "asc",                   //排序方式
+            sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+            pageNumber: 1,                       //初始化加载第一页，默认第一页
+            pageSize: 5,                       //每页的记录行数（*）
+            pageList: [1,3,5,10,25,50,100],        //可供选择的每页的行数（*）
+            showRefresh: true,                  //是否显示刷新按钮
+            queryParams : function() {
+                var type = newsType;
+                return {
+                    page : this.pageNumber,
+                    rows : this.pageSize,
+                    categoryId : type,
+                };
+            },
+            columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'title',
+                    title: '新闻标题'
+                }, {
+                    field: 'releaseTime',
+                    title: '发布时间'
+                }, {
+                    field: 'content',
+                    title: '新闻内容'
+                },{
+                    field: 'engineer',
+                    title: '新闻策划'
+                },{
+                    field: 'compiler',
+                    title: '新闻编辑'
+                },{
+                    field: 'categoryName',
+                    title: '新闻类别'
+                },{
+                    field: 'engineer',
+                    title: '新闻策划'
+                },
+                {
+                    field: 'operate',
+                    title: '操作',
+                    formatter:function(index,row){
+                        var str ='<a href="javascript:deleteNewsById(\''+row.newsId+'\')">删除</a>'
+                        str += ' |  <a href="javascript:queryNewsById(\''+row.newsId+'\')">修改</a>';
+                        return str;
+                    },
+                },
+            ],
+            rowStyle: function (row, index) {
+                var classesArr = ['success', 'info'];
+                var strclass = "";
+                if (index % 2 === 0) {//偶数行
+                    strclass = classesArr[0];
+                } else {//奇数行
+                    strclass = classesArr[1];
+                }
+                return { classes: strclass };
+            },//隔行变色
+        });
+    }
+    function queryNewsById(id) {
+        $.ajax({
+            url:'/news/queryNewById',
+            data:{newsId:id},
+            async:false,
+            success:function(result){
+                console.log(result.categoryId)
+                openAdd();
+                $('#newsId').val(result.newsId);
+                $('#title').val(result.title);
+                $('#content').val(result.content);
+                $('#engineer').val(result.engineer);
+                $('#compiler').val(result.compiler);
+                $('#cateId').val(result.categoryId);
+                console.log($("#cateId").val()+"-----------------------")
+            },
+            error:function(){
+
+            }
+        })
+
+    }
+
+    function delNews() {
+        var ids = "";
+        var idArr = $('#table').bootstrapTable('getSelections');
+        $.each(idArr,function(index,row){
+            ids += ids == "" ? row.newsId : ","+row.newsId;
+        })
+        console.log(ids)
+        deleteNewsById(ids);
+    }
+    function deleteNewsById(ids) {
+        $.ajax({
+            url:'/news/delNewById',
+            data : {
+                ids : ids
+            },
+            success : function(result) {
+                if (result) {
+                    searchNews();
+                } else {
+                    bootbox.alert({
+                        size : "small",
+                        title : "提示",
+                        message : "删除失败...",
+                    })
+                }
+            }
+        })
+    }
+
+    var res;
+    function createAddContent(url){
+        $.ajax({
+            url:url,
+            async:false,
+            success:function(data){
+                res = data;
+            }
+        });
+        return res;
+    }
+
+    function openAdd() {
+        var url = '/goToAddNew'
+        bootbox.dialog({
+            title: '添加商品',
+            closeButton: true,
+            message:createAddContent(url),
+            buttons: {
+                ok: {
+                    label: "保存",
+                    className: 'btn-info',
+                    callback: function(){
+                        $.ajax({
+                            url:'/news/updOrSaveNew',
+                            data: $('#NewsForm').serialize(),
+                            success:function(result){
+                                if (result) {
+                                    searchNews();
+                                } else {
+                                    bootbox.alert({
+                                        size : "small",
+                                        title : "提示",
+                                        message : "新增失败...",
+                                    })
+                                }
+                            },
+                            error:function(){
+
+                            }
+                        })
+                    }
+                },
+                cancel: {
+                    label: "取消",
+                    className: 'btn-danger',
+                    callback: function(){
+                    }
+                }
+            }
+        });
+    }
+
+
+
+</script>
+<body>
+<nav class="navbar navbar-inverse .navbar-fixed-top">
+    <ul class="nav navbar-nav">
+    <li class="nav navbar-nav"><a href="#" style="font-size: 30px;margin-left: 800px;">新闻管理系统 </a></li>
+    </ul>
+</nav>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-1"></div>
+            <div class="col-md-2" style="margin-top: 30px;">
+                <div id="tree"></div>
+            </div>
+            <div class="col-md-8">
+                <button type="button" onclick="delNews()" class="btn btn-danger">
+                    <span class="glyphicon glyphicon-minus" aria-hidden="true">批量删除</span>
+                </button>
+                <button type="button" style="margin-left:30px" onclick="openAdd()" class="btn btn-info">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true">添加新闻</span>
+                </button>
+                <table id="table"></table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

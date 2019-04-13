@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:shiro="http://www.pollix.at/thymeleaf/shiro"
+        xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3"
+>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<script>
+
+    $(function () {
+        intiNewsCate();
+    })
+    function intiNewsCate() {
+        $.ajax({
+            url:'/news/queryCategory',
+            async:false,
+            success:function(result){
+                var html = "<option value='-1'>请选择</option>";
+                $.each(result[0].nodes,function(index,row){
+                        html +=  "<option value="+row.cateId+">"+row.text+"</option>";
+                });
+                $('#cateId').html(html);
+            },
+            error:function(){
+
+            }
+        })
+    }
+
+</script>
+<body>
+<form id="NewsForm" class="text-right">
+    <div class="row">
+        <div class="col-md-2">
+            <div class="form-group">
+                <label for="newsId">新闻主题:</label>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <input type="hidden" name="newsId" id="newsId">
+            <input type="text" class="form-control" name="title" id="title" placeholder="请输入x新闻主题...">
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label for="content">新闻内容:</label>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <input type="text" class="form-control" name="content" id="content" placeholder="请输入新闻内容...">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2">
+            <div class="form-group">
+                <label for="engineer">新闻策划:</label>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <input type="text" class="form-control date" name="engineer" id="engineer" placeholder="请输入新闻内容...">
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label for="compiler">新闻编辑:</label>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <input type="text" class="form-control date" name="compiler" id="compiler" placeholder="请输入新闻策划...">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2">
+            <div class="form-group">
+                <label for="cateId">新闻类别:</label>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <select class="form-control" id="cateId" name="categoryId"></select>
+        </div>
+    </div>
+</form>
+</body>
+</html>
