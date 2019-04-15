@@ -14,35 +14,37 @@ import java.util.List;
  */
 public interface NewsDao {
 
-    @SelectProvider(type = queryNewsClass.class,method = "queryNewCount")
+    @SelectProvider(type = QueryNewsClass.class, method = "queryNewCount")
     Integer queryNewCount(News news);
 
-    @SelectProvider(type = queryNewsClass.class,method = "queryNews")
+    @SelectProvider(type = QueryNewsClass.class, method = "queryNews")
     List<News> queryNews(News news);
 
-    class queryNewsClass{
+    class QueryNewsClass {
         String newsType = "all";
-        public String queryNews(News news){
+
+        public String queryNews(News news) {
             String sql = "select t.newsId as newsId,t.title as title,t.releaseTime as releaseTime,t.content as content,t.engineer as engineer,t.compiler as compiler,t.categoryId as categoryId,c.cateName as categoryName from t_news t left join t_category c on t.categoryId = c.cateId ";
-            if (!news.getCategoryId().equals(newsType)){
-                sql += " where t.categoryId = "+news.getCategoryId();
+            if (!news.getCategoryId().equals(newsType)) {
+                sql += " where t.categoryId = " + news.getCategoryId();
             }
-            sql += news.getPage()!=null && news.getRows() !=null ? " limit "+(news.getPage()-1) * news.getRows()+" , "+news.getRows() : "";
-            return sql;
-        }
-        public String queryNewCount(News news){
-            String sql = "select count(*) from t_news t left join t_category c on t.categoryId = c.cateId ";
-            sql += !news.getCategoryId().equals(newsType) ? " where t.categoryId = "+news.getCategoryId() : "";
+            sql += news.getPage() != null && news.getRows() != null ? " limit " + (news.getPage() - 1) * news.getRows() + " , " + news.getRows() : "";
             return sql;
         }
 
-        public String deleteNews(String[] ids){
+        public String queryNewCount(News news) {
+            String sql = "select count(*) from t_news t left join t_category c on t.categoryId = c.cateId ";
+            sql += !news.getCategoryId().equals(newsType) ? " where t.categoryId = " + news.getCategoryId() : "";
+            return sql;
+        }
+
+        public String deleteNews(String[] ids) {
             String sql = "delete from t_news where newsId in ";
             String newsId = "";
-            for (String id : ids){
-                newsId += newsId == "" ? id : ","+id;
+            for (String id : ids) {
+                newsId += newsId == "" ? id : "," + id;
             }
-            sql += "("+newsId+")";
+            sql += "(" + newsId + ")";
             return sql;
         }
     }

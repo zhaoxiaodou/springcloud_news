@@ -27,8 +27,8 @@ public class NewsServiceImpl implements NewsService {
         Integer count = newsDao.queryNewCount(news);
         List<News> list = newsDao.queryNews(news);
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("total",count);
-        jsonObject.put("rows",list);
+        jsonObject.put("total", count);
+        jsonObject.put("rows", list);
         return jsonObject;
     }
 
@@ -41,9 +41,9 @@ public class NewsServiceImpl implements NewsService {
     @Override
     public Boolean updOrSaveNew(News news) {
         int count;
-        if (news.getNewsId() != null && news.getNewsId() != ""){
-             count = newsDao.updateNew(news);
-        }else {
+        if (news.getNewsId() != null && news.getNewsId() != "") {
+            count = newsDao.updateNew(news);
+        } else {
             count = newsDao.saveNew(news);
         }
         return count == 1 ? true : false;
