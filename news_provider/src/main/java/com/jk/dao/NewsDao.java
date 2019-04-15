@@ -35,10 +35,20 @@ public interface NewsDao {
             sql += !news.getCategoryId().equals(newsType) ? " where t.categoryId = "+news.getCategoryId() : "";
             return sql;
         }
+
+        public String deleteNews(String[] ids){
+            String sql = "delete from t_news where newsId in ";
+            String newsId = "";
+            for (String id : ids){
+                newsId += newsId == "" ? id : ","+id;
+            }
+            sql += "("+newsId+")";
+            return sql;
+        }
     }
 
     @Delete("delete from t_news where newsId in (#{_parameter})")
-    Boolean delNewById(String ids);
+    Boolean delNewById(String[] ids);
 
     @Update(" update t_news set title = #{title},content = #{content},engineer = #{engineer},compiler = #{compiler},categoryId = #{categoryId} where newsId = #{newsId}")
     int updateNew(News news);

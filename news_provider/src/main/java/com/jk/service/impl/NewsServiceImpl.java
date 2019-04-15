@@ -7,9 +7,7 @@ import com.jk.service.NewsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * @author Mr.Zhang
@@ -36,7 +34,8 @@ public class NewsServiceImpl implements NewsService {
 
     @Override
     public Boolean delNewById(String ids) {
-        return newsDao.delNewById(ids);
+        String[] split = ids.split(",");
+        return newsDao.delNewById(split);
     }
 
     @Override
